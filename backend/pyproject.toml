@@ -1,0 +1,39 @@
+[project]
+name = "finpulse-backend"
+version = "0.1.0"
+description = "FinPulse backend — Django REST + Channels + Celery"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations", "staticfiles"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "DJ", "C4", "SIM"]
+ignore = ["B008"]  # function calls in argument defaults (common in DRF)
+
+[tool.ruff.lint.per-file-ignores]
+"*/tests/*" = ["S101"]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+extend-exclude = "migrations"
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = false
+disallow_untyped_defs = false
+check_untyped_defs = true
+exclude = ["migrations/", "tests/", "manage.py"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py", "tests.py"]
+addopts = "--strict-markers --reuse-db"
+testpaths = ["apps", "core", "common"]
+
+[tool.coverage.run]
+omit = ["*/migrations/*", "*/tests/*", "manage.py", "config/asgi.py", "config/wsgi.py"]

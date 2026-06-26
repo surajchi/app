@@ -1,0 +1,8 @@
+{
+  "name": "@finpulse/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared TypeScript / ESLint / Prettier config presets",
+  "files": ["tsconfig.base.json", "eslint-preset.cjs", "prettier-preset.cjs"],
+  "main": "eslint-preset.cjs"
+}

@@ -1,0 +1,30 @@
+{
+  "name": "finpulse",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-Powered Forex & Global Market Intelligence Platform",
+  "packageManager": "pnpm@10.33.3",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "mobile": "pnpm --filter @finpulse/mobile",
+    "mobile:start": "pnpm --filter @finpulse/mobile start",
+    "mobile:web": "pnpm --filter @finpulse/mobile web",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "be:up": "docker compose up -d postgres redis api",
+    "be:up:all": "docker compose up -d",
+    "be:down": "docker compose down",
+    "be:logs": "docker compose logs -f api",
+    "be:migrate": "docker compose exec api python manage.py migrate",
+    "be:makemigrations": "docker compose exec api python manage.py makemigrations",
+    "be:superuser": "docker compose exec api python manage.py createsuperuser",
+    "be:test": "docker compose exec api pytest -q",
+    "be:shell": "docker compose exec api bash"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}

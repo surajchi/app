@@ -1,0 +1,70 @@
+name: CI — Backend
+
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", ".github/workflows/ci-backend.yml"]
+  pull_request:
+    paths: ["backend/**", ".github/workflows/ci-backend.yml"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: timescale/timescaledb:latest-pg16
+        env:
+          POSTGRES_DB: finpulse_test
+          POSTGRES_USER: finpulse
+          POSTGRES_PASSWORD: finpulse
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U finpulse -d finpulse_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 3s --health-retries 12
+
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      SECRET_KEY: ci-test-secret-key
+      DEBUG: "false"
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      DATABASE_URL: postgres://finpulse:finpulse@localhost:5432/finpulse_test
+      REDIS_URL: redis://localhost:6379/0
+      CELERY_BROKER_URL: redis://localhost:6379/1
+      CELERY_RESULT_BACKEND: redis://localhost:6379/2
+      # Tests run with HS256 (SECRET_KEY); RS256 keys are exercised in deploy env.
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements/dev.txt
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Format check (black)
+        run: black --check .
+
+      - name: Type check (mypy)
+        run: mypy .
+
+      - name: Migrations are up to date
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Run tests
+        run: pytest -q --cov=. --cov-report=term-missing
