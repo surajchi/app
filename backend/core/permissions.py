@@ -1,4 +1,5 @@
 """Reusable DRF permission classes. RBAC/plan gating is added in Phase 2."""
+
 from __future__ import annotations
 
 from typing import Any

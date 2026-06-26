@@ -1,4 +1,5 @@
 """Custom DRF exception handler producing the standard error envelope."""
+
 from __future__ import annotations
 
 import logging

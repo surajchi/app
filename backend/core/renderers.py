@@ -9,6 +9,7 @@ Errors are pre-shaped by ``core.exceptions.custom_exception_handler`` and pass
 through untouched. Paginated payloads ({count, next, previous, results}) are
 split into ``data`` + ``meta``.
 """
+
 from __future__ import annotations
 
 from typing import Any

@@ -1,4 +1,5 @@
 """Structured JSON log formatter (used in non-DEBUG environments)."""
+
 from __future__ import annotations
 
 import datetime as dt
@@ -11,7 +12,7 @@ class JsonFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         payload: dict[str, object] = {
-            "time": dt.datetime.fromtimestamp(record.created, tz=dt.timezone.utc).isoformat(),
+            "time": dt.datetime.fromtimestamp(record.created, tz=dt.UTC).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),

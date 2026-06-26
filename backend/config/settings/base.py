@@ -5,6 +5,7 @@ Environment-specific modules (local / prod / test) import everything from here
 and override as needed. All configuration is sourced from environment variables
 (12-factor) via django-environ — never hardcode secrets.
 """
+
 from __future__ import annotations
 
 from datetime import timedelta
@@ -50,6 +51,9 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "apps.users",
+    "apps.rbac",
+    "apps.profiles",
+    "apps.accounts",
     "apps.authentication",
 ]
 

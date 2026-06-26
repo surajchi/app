@@ -1,4 +1,5 @@
 """Soft-delete manager/queryset used by domain models via BaseModel."""
+
 from __future__ import annotations
 
 from django.db import models
@@ -13,10 +14,10 @@ class SoftDeleteQuerySet(models.QuerySet):
     def hard_delete(self) -> tuple[int, dict[str, int]]:
         return super().delete()
 
-    def alive(self) -> "SoftDeleteQuerySet":
+    def alive(self) -> SoftDeleteQuerySet:
         return self.filter(deleted_at__isnull=True)
 
-    def dead(self) -> "SoftDeleteQuerySet":
+    def dead(self) -> SoftDeleteQuerySet:
         return self.filter(deleted_at__isnull=False)
 
 

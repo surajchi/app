@@ -1,4 +1,5 @@
 """Serializers for registration, login, token refresh, and logout."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -12,27 +13,15 @@ from rest_framework_simplejwt.serializers import (
 from rest_framework_simplejwt.settings import api_settings
 
 from apps.users.models import User
+from apps.users.serializers import UserSerializer  # canonical serializer (includes roles)
 
-
-class UserSerializer(serializers.ModelSerializer):
-    """Public representation of a user (read-only)."""
-
-    email_verified = serializers.BooleanField(read_only=True)
-
-    class Meta:
-        model = User
-        fields = (
-            "id",
-            "email",
-            "full_name",
-            "phone",
-            "status",
-            "is_2fa_enabled",
-            "email_verified",
-            "is_staff",
-            "created_at",
-        )
-        read_only_fields = fields
+__all__ = [
+    "UserSerializer",
+    "RegisterSerializer",
+    "LoginSerializer",
+    "RefreshSerializer",
+    "LogoutSerializer",
+]
 
 
 class RegisterSerializer(serializers.ModelSerializer):

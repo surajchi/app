@@ -1,4 +1,5 @@
 """factory_boy fixtures for the User model."""
+
 from __future__ import annotations
 
 import factory

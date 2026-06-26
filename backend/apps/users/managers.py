@@ -1,4 +1,5 @@
 """Manager for the custom email-based User model."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, email: str, password: str | None, **extra: Any) -> "User":
+    def _create_user(self, email: str, password: str | None, **extra: Any) -> User:
         if not email:
             raise ValueError("An email address is required.")
         email = self.normalize_email(email).lower()
@@ -21,12 +22,12 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_user(self, email: str, password: str | None = None, **extra: Any) -> "User":
+    def create_user(self, email: str, password: str | None = None, **extra: Any) -> User:
         extra.setdefault("is_staff", False)
         extra.setdefault("is_superuser", False)
         return self._create_user(email, password, **extra)
 
-    def create_superuser(self, email: str, password: str | None = None, **extra: Any) -> "User":
+    def create_superuser(self, email: str, password: str | None = None, **extra: Any) -> User:
         extra.setdefault("is_staff", True)
         extra.setdefault("is_superuser", True)
         extra.setdefault("status", "active")

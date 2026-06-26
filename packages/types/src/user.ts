@@ -11,5 +11,11 @@ export interface User {
   is_2fa_enabled: boolean;
   email_verified: boolean;
   is_staff: boolean;
+  roles: string[];
   created_at: string;
+}
+
+export interface UserUpdate {
+  full_name?: string;
+  phone?: string | null;
 }

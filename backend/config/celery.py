@@ -1,4 +1,5 @@
 """Celery application factory. Imported in config/__init__.py so @shared_task works."""
+
 import os
 
 from celery import Celery

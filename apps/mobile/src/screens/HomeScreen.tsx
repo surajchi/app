@@ -5,8 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/common/Button';
 import { authApi } from '@/services/api/auth';
 import { useAuthStore } from '@/store/authStore';
+import type { RootScreenProps } from '@/navigation/types';
 
-export function HomeScreen() {
+export function HomeScreen({ navigation }: RootScreenProps<'Home'>) {
   const user = useAuthStore((s) => s.user);
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const logout = useAuthStore((s) => s.logout);
@@ -41,6 +42,8 @@ export function HomeScreen() {
           </Text>
         </View>
 
+        <Button title="View profile" onPress={() => navigation.navigate('Profile')} />
+        <View className="h-3" />
         <Button title="Log out" variant="ghost" loading={loading} onPress={onLogout} />
       </View>
     </SafeAreaView>

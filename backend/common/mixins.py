@@ -1,5 +1,6 @@
 """Abstract base models giving every domain table a UUID PK, timestamps,
 and soft delete. Use ``BaseModel`` for new feature models (Phase 2+)."""
+
 from __future__ import annotations
 
 import uuid

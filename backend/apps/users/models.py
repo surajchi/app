@@ -1,4 +1,5 @@
 """Custom User model — email is the identifier (no username)."""
+
 from __future__ import annotations
 
 import uuid

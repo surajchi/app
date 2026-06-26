@@ -1,4 +1,5 @@
 """System endpoints: liveness & readiness probes."""
+
 from __future__ import annotations
 
 from django.core.cache import cache

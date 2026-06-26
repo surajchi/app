@@ -1,4 +1,5 @@
 """Pagination defaults. The envelope renderer maps these into `meta`."""
+
 from rest_framework.pagination import PageNumberPagination
 
 
