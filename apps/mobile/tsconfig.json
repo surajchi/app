@@ -5,15 +5,17 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@finpulse/types": ["../../packages/types/src"]
+      "@/*": [
+        "src/*"
+      ],
+      "@finpulse/types": [
+        "../../packages/types/src"
+      ]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts",
     "nativewind-env.d.ts"
   ]
 }

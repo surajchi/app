@@ -5,9 +5,7 @@ module.exports = function (api) {
       ['babel-preset-expo', { jsxImportSource: 'nativewind' }],
       'nativewind/babel',
     ],
-    plugins: [
-      // react-native-reanimated/plugin must be listed last.
-      'react-native-reanimated/plugin',
-    ],
+    // Note: babel-preset-expo (SDK 52) auto-adds react-native-reanimated/plugin
+    // when reanimated is installed, so it is not listed here.
   };
 };

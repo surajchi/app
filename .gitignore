@@ -29,6 +29,7 @@ build/
 .expo-shared/
 web-build/
 *.tsbuildinfo
+expo-env.d.ts
 
 # ---- Editors / OS ----
 .vscode/*
@@ -44,6 +45,10 @@ docker-data/
 # ---- Django collected static ----
 staticfiles/
 backend/staticfiles/
+
+# ---- Celery runtime ----
+celerybeat-schedule*
+backend/celerybeat-schedule*
 
 # ---- Mobile build artifacts ----
 apps/mobile/android/
