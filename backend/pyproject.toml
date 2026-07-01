@@ -40,8 +40,10 @@ follow_imports = "skip"
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["test_*.py", "tests.py"]
-addopts = "--strict-markers --reuse-db"
-testpaths = ["apps", "core", "common"]
+addopts = "--strict-markers --reuse-db --ds=config.settings.test"
+testpaths = ["apps", "core", "common", "realtime"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.coverage.run]
 omit = ["*/migrations/*", "*/tests/*", "manage.py", "config/asgi.py", "config/wsgi.py"]

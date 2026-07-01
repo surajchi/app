@@ -41,6 +41,7 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "channels",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -55,6 +56,8 @@ LOCAL_APPS = [
     "apps.profiles",
     "apps.accounts",
     "apps.authentication",
+    "apps.markets",
+    "apps.news",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -135,12 +138,42 @@ CACHES = {
     }
 }
 
+# --- Channels (WebSockets) --------------------------------------------------
+CHANNELS_REDIS_URL = env.str("CHANNELS_REDIS_URL", default="redis://redis:6379/3")
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [CHANNELS_REDIS_URL]},
+    }
+}
+
 # --- Celery -----------------------------------------------------------------
 CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", default="redis://redis:6379/1")
 CELERY_RESULT_BACKEND = env.str("CELERY_RESULT_BACKEND", default="redis://redis:6379/2")
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300
 CELERY_TIMEZONE = "UTC"
+CELERY_BEAT_SCHEDULE = {
+    "poll-market-quotes": {
+        "task": "apps.markets.tasks.poll_quotes",
+        "schedule": env.float("MARKET_POLL_INTERVAL", default=15.0),
+    },
+    "ingest-news": {
+        "task": "apps.news.tasks.ingest_news",
+        "schedule": env.float("NEWS_POLL_INTERVAL", default=60.0),
+    },
+}
+
+# --- Market data ------------------------------------------------------------
+MARKET_DATA_PROVIDER = env.str("MARKET_DATA_PROVIDER", default="synthetic")
+
+# --- News -------------------------------------------------------------------
+NEWS_PROVIDER = env.str("NEWS_PROVIDER", default="synthetic")
+NEWS_RSS_FEEDS = env.list("NEWS_RSS_FEEDS", default=[])
+
+# --- Search (OpenSearch) ----------------------------------------------------
+OPENSEARCH_URL = env.str("OPENSEARCH_URL", default="http://opensearch:9200")
+SEARCH_ENABLED = env.bool("SEARCH_ENABLED", default=True)
 
 # --- DRF --------------------------------------------------------------------
 REST_FRAMEWORK = {
@@ -197,6 +230,31 @@ SIMPLE_JWT = {
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
 }
+
+# --- Email ------------------------------------------------------------------
+# Dev defaults to the console backend (emails print to logs; no SMTP needed).
+EMAIL_BACKEND = env.str("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = env.str("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="FinPulse <no-reply@finpulse.app>")
+
+# Base URL used to build links in emails (deep links into the app).
+FRONTEND_URL = env.str("FRONTEND_URL", default="http://localhost:8081")
+
+# --- Auth flows (verification / OTP / 2FA / OAuth) --------------------------
+EMAIL_VERIFICATION_TTL = env.int("EMAIL_VERIFICATION_TTL", default=86400)  # 24h
+OTP_TTL_SECONDS = env.int("OTP_TTL_SECONDS", default=300)  # 5 min
+OTP_LENGTH = env.int("OTP_LENGTH", default=6)
+OTP_MAX_ATTEMPTS = env.int("OTP_MAX_ATTEMPTS", default=5)
+TWO_FACTOR_ISSUER = env.str("TWO_FACTOR_ISSUER", default="FinPulse")
+TWO_FA_CHALLENGE_TTL = env.int("TWO_FA_CHALLENGE_TTL", default=300)  # 5 min
+
+# OAuth client IDs (required only to use the respective provider live).
+GOOGLE_CLIENT_ID = env.str("GOOGLE_CLIENT_ID", default="")
+APPLE_CLIENT_ID = env.str("APPLE_CLIENT_ID", default="")
 
 # --- OpenAPI / Spectacular --------------------------------------------------
 SPECTACULAR_SETTINGS = {

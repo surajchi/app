@@ -5,11 +5,16 @@ djangorestframework-simplejwt==5.3.1
 django-cors-headers==4.6.0
 django-filter==24.3
 django-environ==0.11.2
+channels==4.2.0
+channels-redis==4.2.1
+opensearch-py==2.7.1
 drf-spectacular==0.28.0
 psycopg[binary]==3.2.3
 redis==5.2.1
 celery==5.4.0
 cryptography==44.0.0
+pyotp==2.9.0
+google-auth==2.37.0
 gunicorn==23.0.0
 uvicorn[standard]==0.34.0
 whitenoise==6.8.2

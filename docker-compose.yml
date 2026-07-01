@@ -1,20 +1,18 @@
 # Base stack — environment-neutral service definitions.
-# Dev overrides (host ports, bind mounts, autoreload) live in
-# docker-compose.override.yml, which Compose merges automatically.
+# Backend services read config from backend/.env (env_file). Frontend env lives
+# separately in apps/mobile/.env. Dev overrides (host ports, bind mounts,
+# autoreload) live in docker-compose.override.yml, merged automatically.
 name: finpulse
 
 services:
   postgres:
     image: timescale/timescaledb:latest-pg16
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-finpulse}
-      POSTGRES_USER: ${POSTGRES_USER:-finpulse}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-finpulse}
+    env_file: ./backend/.env
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-finpulse} -d ${POSTGRES_DB:-finpulse}"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 12
@@ -34,13 +32,13 @@ services:
   opensearch:
     image: opensearchproject/opensearch:2.13.0
     restart: unless-stopped
+    env_file: ./backend/.env
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
       - "DISABLE_INSTALL_DEMO_CONFIG=true"
       - "DISABLE_SECURITY_PLUGIN=true"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD:-FinPulse-OS-2026!}"
     ulimits:
       memlock: { soft: -1, hard: -1 }
       nofile: { soft: 65536, hard: 65536 }
@@ -56,9 +54,7 @@ services:
     image: minio/minio:latest
     restart: unless-stopped
     command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-finpulse}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-finpulse-minio}
+    env_file: ./backend/.env
     volumes:
       - miniodata:/data
     healthcheck:
@@ -72,7 +68,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: .env
+    env_file: ./backend/.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -96,7 +92,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: .env
+    env_file: ./backend/.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -109,7 +105,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: .env
+    env_file: ./backend/.env
     depends_on:
       redis:
         condition: service_healthy

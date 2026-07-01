@@ -75,3 +75,62 @@ class RefreshSerializer(TokenRefreshSerializer):
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
+
+
+# --- Phase 2B: verification / reset / OTP / 2FA / OAuth ----------------------
+
+
+class VerifyEmailSerializer(serializers.Serializer):
+    token = serializers.CharField()
+
+
+class ResendVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_new_password(self, value: str) -> str:
+        validate_password(value)
+        return value
+
+
+class OTPRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class OTPVerifySerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField()
+    device = serializers.DictField(required=False)
+
+
+class TwoFactorVerifySerializer(serializers.Serializer):
+    code = serializers.CharField()
+
+
+class TwoFactorDisableSerializer(serializers.Serializer):
+    code = serializers.CharField()
+
+
+class TwoFactorLoginSerializer(serializers.Serializer):
+    challenge_token = serializers.CharField()
+    code = serializers.CharField()
+    device = serializers.DictField(required=False)
+
+
+class OAuthGoogleSerializer(serializers.Serializer):
+    id_token = serializers.CharField()
+    device = serializers.DictField(required=False)
+
+
+class OAuthAppleSerializer(serializers.Serializer):
+    identity_token = serializers.CharField()
+    device = serializers.DictField(required=False)

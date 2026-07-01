@@ -60,7 +60,7 @@ Two compose files:
 - **`docker-compose.yml`** — base definition (all environments).
 - **`docker-compose.override.yml`** — dev overrides (bind-mounts for hot reload, exposed ports, debug). Compose loads both automatically in dev.
 
-Configuration comes from **`.env`** (copied from `.env.example`). Never commit `.env`.
+Configuration is split by folder: backend/infra services read **`backend/.env`** (copied from `backend/.env.example`); the Expo app reads **`apps/mobile/.env`**. Never commit either `.env`.
 
 ---
 

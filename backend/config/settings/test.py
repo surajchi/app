@@ -11,6 +11,15 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 # Use the local-memory cache so tests don't require a running Redis for caching.
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
+# Capture emails in mail.outbox instead of printing them.
+EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+
+# In-memory channel layer for WebSocket tests (no Redis needed).
+CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+
+# Don't hit OpenSearch during tests (search is tested via mocks + DB fallback).
+SEARCH_ENABLED = False
+
 # Run Celery tasks eagerly (synchronously) in tests.
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True

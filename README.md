@@ -59,18 +59,20 @@ finpulse/
 ## Quickstart (once code exists — target shape)
 
 ```bash
-cp .env.example .env          # fill provider keys & secrets
-docker compose up -d          # postgres, redis, opensearch, minio, api, ai, worker, beat, nginx
-docker compose exec api python manage.py migrate
-docker compose exec api python manage.py loaddata seed   # markets, exchanges, symbols
-# API:   http://localhost:8000/api/docs
-# AI:    http://localhost:8100/docs
-# MinIO: http://localhost:9001
+# Backend + frontend env live in their own folders:
+cp backend/.env.example backend/.env          # backend + infra config/secrets
+cp apps/mobile/.env.example apps/mobile/.env   # EXPO_PUBLIC_* only
+
+docker compose up -d          # postgres, redis, opensearch, minio, api, worker, beat
+# (api auto-runs collectstatic + migrate on start)
+# API docs:  http://localhost:8000/api/docs/
+# MinIO:     http://localhost:9001
 ```
 
 Mobile/web app:
 ```bash
-cd apps/mobile && pnpm install && pnpm expo start   # press i / a / w
+pnpm install
+pnpm --filter @finpulse/mobile web   # or: start (then press i / a / w)
 ```
 
 ## Status
