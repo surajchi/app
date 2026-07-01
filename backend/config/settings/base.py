@@ -65,6 +65,7 @@ LOCAL_APPS = [
     "apps.portfolios",
     "apps.dashboard",
     "apps.administration",
+    "apps.billing",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -173,10 +174,20 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.alerts.tasks.evaluate_price_alerts",
         "schedule": env.float("ALERT_EVAL_INTERVAL", default=30.0),
     },
+    "process-subscription-renewals": {
+        "task": "apps.billing.tasks.process_renewals",
+        "schedule": env.float("BILLING_RENEWAL_INTERVAL", default=3600.0),
+    },
 }
 
 # --- Market data ------------------------------------------------------------
 MARKET_DATA_PROVIDER = env.str("MARKET_DATA_PROVIDER", default="synthetic")
+
+# --- Billing / Payments -----------------------------------------------------
+# Free mock provider by default (no keys). Swap for a real gateway when live.
+PAYMENT_PROVIDER = env.str("PAYMENT_PROVIDER", default="mock")
+PAYMENT_WEBHOOK_SECRET = env.str("PAYMENT_WEBHOOK_SECRET", default="")
+BILLING_CURRENCY = env.str("BILLING_CURRENCY", default="USD")
 
 # --- News -------------------------------------------------------------------
 NEWS_PROVIDER = env.str("NEWS_PROVIDER", default="synthetic")
