@@ -7,7 +7,7 @@ from typing import Any
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
-from realtime.groups import alerts_group, news_group, quote_group
+from realtime.groups import alerts_group, news_group, notif_group, quote_group
 
 
 def publish_quote(symbol: str, data: dict[str, Any]) -> None:
@@ -24,6 +24,16 @@ def publish_alert(user_id: str, data: dict[str, Any]) -> None:
         return
     group = alerts_group(user_id)
     async_to_sync(layer.group_send)(group, {"type": "alert.message", "group": group, "data": data})
+
+
+def publish_notification(user_id: str, data: dict[str, Any]) -> None:
+    layer = get_channel_layer()
+    if layer is None:
+        return
+    group = notif_group(user_id)
+    async_to_sync(layer.group_send)(
+        group, {"type": "notification.message", "group": group, "data": data}
+    )
 
 
 def publish_news(data: dict[str, Any], category: str | None = None) -> None:

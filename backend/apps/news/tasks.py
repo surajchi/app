@@ -12,6 +12,7 @@ logger = logging.getLogger("finpulse")
 @shared_task(name="apps.news.tasks.ingest_news")
 def ingest_news() -> int:
     """Fetch from the active provider and run each article through the pipeline."""
+    from apps.alerts.services import check_news_article
     from apps.news.pipeline import process
     from integrations.news.registry import get_news_provider
     from realtime.publish import publish_news
@@ -27,6 +28,10 @@ def ingest_news() -> int:
         if article is None:
             continue
         created += 1
+        try:
+            check_news_article(article)
+        except Exception:  # noqa: BLE001 - alert failures must not stop ingestion
+            logger.exception("news.alert_check_failed", extra={"article_id": str(article.id)})
         if article.is_breaking:
             publish_news(
                 {

@@ -3,10 +3,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
+import { AlertsScreen } from '@/screens/AlertsScreen';
 import { HomeScreen } from '@/screens/HomeScreen';
 import { LoginScreen } from '@/screens/LoginScreen';
+import { PortfolioScreen } from '@/screens/PortfolioScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { RegisterScreen } from '@/screens/RegisterScreen';
+import { WatchlistScreen } from '@/screens/WatchlistScreen';
 import { useAuthStore } from '@/store/authStore';
 import type { RootStackParamList } from './types';
 
@@ -35,6 +38,9 @@ export function RootNavigator() {
         {user ? (
           <>
             <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Watchlist" component={WatchlistScreen} />
+            <Stack.Screen name="Portfolio" component={PortfolioScreen} />
+            <Stack.Screen name="Alerts" component={AlertsScreen} />
             <Stack.Screen
               name="Profile"
               component={ProfileScreen}

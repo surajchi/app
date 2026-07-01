@@ -21,3 +21,7 @@ def news_group(category: str | None = None) -> str:
     if category:
         return f"news.{_SAFE.sub('-', category)}"[:99]
     return "news"
+
+
+def notif_group(user_id: str) -> str:
+    return f"notif.{_SAFE.sub('-', str(user_id))}"[:99]

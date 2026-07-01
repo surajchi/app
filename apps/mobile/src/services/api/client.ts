@@ -6,7 +6,7 @@
  *   (de-duplicated across concurrent requests), retries the original request,
  *   and logs out if refresh fails.
  */
-import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type { ApiSuccess, RefreshResult } from '@finpulse/types';
 
 import { env } from '@/config/env';

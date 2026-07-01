@@ -8,5 +8,11 @@ urlpatterns = [
     path("profile/", include("apps.profiles.urls")),
     path("markets/", include("apps.markets.urls")),
     path("news/", include("apps.news.urls")),
-    # Phase 5+: ai, alerts, ... mounted here.
+    path("ai/", include("apps.ai.urls")),
+    path("notifications/", include("apps.notifications.urls")),
+    path("alerts/", include("apps.alerts.urls")),
+    path("watchlists/", include("apps.watchlists.urls")),
+    path("portfolios/", include("apps.portfolios.urls")),
+    path("dashboard/", include("apps.dashboard.urls")),
+    path("admin/", include("apps.administration.urls")),
 ]

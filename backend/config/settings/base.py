@@ -58,6 +58,13 @@ LOCAL_APPS = [
     "apps.authentication",
     "apps.markets",
     "apps.news",
+    "apps.ai",
+    "apps.notifications",
+    "apps.alerts",
+    "apps.watchlists",
+    "apps.portfolios",
+    "apps.dashboard",
+    "apps.administration",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -162,6 +169,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.news.tasks.ingest_news",
         "schedule": env.float("NEWS_POLL_INTERVAL", default=60.0),
     },
+    "evaluate-price-alerts": {
+        "task": "apps.alerts.tasks.evaluate_price_alerts",
+        "schedule": env.float("ALERT_EVAL_INTERVAL", default=30.0),
+    },
 }
 
 # --- Market data ------------------------------------------------------------
@@ -170,10 +181,16 @@ MARKET_DATA_PROVIDER = env.str("MARKET_DATA_PROVIDER", default="synthetic")
 # --- News -------------------------------------------------------------------
 NEWS_PROVIDER = env.str("NEWS_PROVIDER", default="synthetic")
 NEWS_RSS_FEEDS = env.list("NEWS_RSS_FEEDS", default=[])
+# Sentiment backend for the news pipeline: "lexicon" (local) or "ai_service".
+NEWS_SENTIMENT_BACKEND = env.str("NEWS_SENTIMENT_BACKEND", default="lexicon")
 
 # --- Search (OpenSearch) ----------------------------------------------------
 OPENSEARCH_URL = env.str("OPENSEARCH_URL", default="http://opensearch:9200")
 SEARCH_ENABLED = env.bool("SEARCH_ENABLED", default=True)
+
+# --- AI service -------------------------------------------------------------
+AI_SERVICE_URL = env.str("AI_SERVICE_URL", default="http://ai:8100")
+AI_SERVICE_TOKEN = env.str("AI_SERVICE_TOKEN", default="")
 
 # --- DRF --------------------------------------------------------------------
 REST_FRAMEWORK = {

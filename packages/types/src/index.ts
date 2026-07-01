@@ -3,3 +3,8 @@ export * from './user';
 export * from './auth';
 export * from './profile';
 export * from './ws';
+export * from './markets';
+export * from './watchlists';
+export * from './portfolios';
+export * from './alerts';
+export * from './dashboard';

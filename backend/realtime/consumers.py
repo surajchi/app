@@ -19,7 +19,7 @@ from typing import Any
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
-from realtime.groups import QUOTE_PREFIX, alerts_group, news_group, quote_group
+from realtime.groups import QUOTE_PREFIX, alerts_group, news_group, notif_group, quote_group
 
 
 class MarketConsumer(AsyncJsonWebsocketConsumer):
@@ -73,10 +73,10 @@ class MarketConsumer(AsyncJsonWebsocketConsumer):
         if isinstance(channel, str) and channel.startswith("news."):
             slug = channel[len("news.") :]
             return news_group(slug) if slug else None
-        if channel == "alerts":
+        if channel in ("alerts", "notifications"):
             user = self.scope.get("user")
             if user is not None and getattr(user, "is_authenticated", False):
-                return alerts_group(user.id)
+                return alerts_group(user.id) if channel == "alerts" else notif_group(user.id)
         return None
 
     # --- channel-layer event handlers --------------------------------------
@@ -89,3 +89,8 @@ class MarketConsumer(AsyncJsonWebsocketConsumer):
 
     async def news_message(self, event: dict[str, Any]) -> None:
         await self.send_json({"channel": event["group"], "type": "news", "data": event["data"]})
+
+    async def notification_message(self, event: dict[str, Any]) -> None:
+        await self.send_json(
+            {"channel": event["group"], "type": "notification", "data": event["data"]}
+        )

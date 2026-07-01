@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import type { ApiError } from '@finpulse/types';
 
 /** Extract a human-readable message from an Axios error carrying our envelope. */

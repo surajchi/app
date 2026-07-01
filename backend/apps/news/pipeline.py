@@ -12,6 +12,7 @@ from urllib.parse import urlparse, urlunparse
 from django.conf import settings
 from django.db import IntegrityError
 
+from apps.news import sentiment_backend
 from apps.news.constants import DEFAULT_CATEGORIES, NEAR_DUPLICATE_HAMMING, ArticleStatus
 from apps.news.models import NewsArticle, NewsCategory, NewsEntity, NewsSentiment
 from apps.news.nlp import analyzers, entities
@@ -61,7 +62,7 @@ def process(raw: RawArticle) -> NewsArticle | None:
     if _is_near_duplicate(fingerprint):
         return None
 
-    sentiment = analyzers.analyze_sentiment(text)
+    sentiment = sentiment_backend.analyze_sentiment(text)
     extracted = entities.extract_entities(text)
     score = analyzers.impact_score(raw.source, float(sentiment["score"]), len(extracted))
 
