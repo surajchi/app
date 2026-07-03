@@ -6,11 +6,43 @@ TradingView + Bloomberg-lite + Investing.com + Trading Economics + Google News +
 
 ## What's here
 
-This repository currently contains the **master architecture blueprint** — the design that will be converted into code over multiple build sessions.
+A working, monorepo implementation of the FinPulse platform — Django/DRF backend
+(REST + WebSockets + Celery), a FastAPI AI microservice, and an Expo (iOS /
+Android / Web) client — built on the architecture blueprint in [`docs/`](docs/).
+Everything runs **free of paid third-party APIs**: market data, news, sentiment,
+AI, and payments all default to self-contained providers, swappable via env vars.
 
-📐 **Start here:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+📐 **Architecture:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · 🐳 **Docker (Windows):** [`docs/DOCKER.md`](docs/DOCKER.md) · 🚀 **Deploy:** [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
 
-🐳 **Setting up Docker?** See [`docs/DOCKER.md`](docs/DOCKER.md) — install + usage guide for Windows.
+### Build status
+
+| Phase | Scope | Status |
+|-------|-------|--------|
+| 1  | Monorepo + foundation (settings, health, logging, CI) | ✅ |
+| 2  | Auth, users, RBAC, profiles, sessions & devices, OAuth/OTP/2FA | ✅ |
+| 3  | Market data + WebSockets + historical (TimescaleDB) | ✅ |
+| 4  | News ingestion + NLP + sentiment + search | ✅ |
+| 5  | AI engine (forecasting, technical, recommendations) | ✅ |
+| 6  | Notifications + alert engine | ✅ |
+| 7  | Watchlists, portfolio, dashboard (+ mobile screens) | ✅ |
+| 8  | Admin console (RBAC-gated, audit log) | ✅ |
+| 9  | Payments & subscriptions (pluggable provider) | ✅ |
+| 10 | Hardening, docs, deployment | ✅ |
+
+### Run it (local, Docker)
+
+```bash
+cp backend/.env.example backend/.env
+docker compose up -d                       # api, worker, beat, ai, postgres, redis, …
+docker compose run --rm api python manage.py createsuperuser
+# API docs: http://localhost:8000/api/docs/   ·   health: /healthz/  /readyz/
+
+# Mobile / web client
+cp apps/mobile/.env.example apps/mobile/.env
+pnpm install && pnpm --filter @finpulse/mobile web
+```
+
+Backend gate (lint + types + tests): `docker compose run --rm api sh -c "ruff check . && black --check . && mypy . && pytest -q"`.
 
 | Topic | Doc |
 |-------|-----|

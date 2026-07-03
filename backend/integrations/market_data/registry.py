@@ -6,9 +6,11 @@ from django.conf import settings
 
 from integrations.market_data.base import MarketDataProvider
 from integrations.market_data.synthetic import SyntheticProvider
+from integrations.market_data.yahoo import YahooProvider
 
 _PROVIDERS: dict[str, type] = {
     "synthetic": SyntheticProvider,
+    "yahoo": YahooProvider,
 }
 
 

@@ -7,7 +7,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound
 from rest_framework.filters import SearchFilter
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -151,3 +151,21 @@ class MoversView(APIView):
             for row in rows
         ]
         return Response({"type": kind, "results": data})
+
+
+class InstrumentAnalysisView(APIView):
+    """Fused AI analysis: quote + history + forecast + technical + news effects."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(tags=["markets"])
+    def get(self, request: Request, symbol: str) -> Response:
+        from apps.markets.analysis import build_instrument_analysis
+
+        instrument = _get_instrument(symbol)
+        try:
+            horizon = int(request.query_params.get("horizon", 7))
+        except ValueError:
+            horizon = 7
+        horizon = max(1, min(horizon, 30))
+        return Response(build_instrument_analysis(instrument, horizon=horizon))

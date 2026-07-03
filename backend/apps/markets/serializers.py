@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from apps.markets.models import Exchange, Instrument
+from apps.markets.services import latest_quote
 
 
 class ExchangeSerializer(serializers.ModelSerializer):
@@ -12,14 +13,27 @@ class ExchangeSerializer(serializers.ModelSerializer):
 
 class InstrumentSerializer(serializers.ModelSerializer):
     exchange = serializers.SerializerMethodField()
+    quote = serializers.SerializerMethodField()
 
     class Meta:
         model = Instrument
-        fields = ("id", "asset_class", "symbol", "name", "exchange", "currency", "is_active")
+        fields = (
+            "id",
+            "asset_class",
+            "symbol",
+            "name",
+            "exchange",
+            "currency",
+            "is_active",
+            "quote",
+        )
         read_only_fields = fields
 
     def get_exchange(self, obj: Instrument) -> str | None:
         return obj.exchange.code if obj.exchange_id else None
+
+    def get_quote(self, obj: Instrument) -> dict | None:
+        return latest_quote(obj)
 
 
 class CandleSerializer(serializers.Serializer):

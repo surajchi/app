@@ -8,6 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.dashboard.brief import build_brief
 from apps.dashboard.services import build_dashboard
 
 
@@ -17,3 +18,13 @@ class DashboardView(APIView):
 
     def get(self, request: Request) -> Response:
         return Response(build_dashboard(request.user))
+
+
+@extend_schema(tags=["dashboard"])
+class BriefView(APIView):
+    """Daily/weekly market brief — shown even when the user has no alerts."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+        return Response(build_brief())

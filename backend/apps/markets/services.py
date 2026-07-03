@@ -58,3 +58,29 @@ def movers(
 
     rows.sort(key=lambda row: row["quote"].get("change_percent", 0.0), reverse=kind != "losers")
     return rows[:limit]
+
+
+def market_breadth() -> dict[str, Any]:
+    """Advancers/decliners and average move across instruments with a live quote."""
+    advancers = decliners = counted = 0
+    total_change = 0.0
+    for instrument in Instrument.objects.filter(is_active=True).only("id"):
+        quote = cache.get_quote(instrument.id)
+        if not quote:
+            continue
+        change_pct = quote.get("change_percent")
+        if change_pct is None:
+            continue
+        counted += 1
+        total_change += change_pct
+        if change_pct > 0:
+            advancers += 1
+        elif change_pct < 0:
+            decliners += 1
+    avg_change = round(total_change / counted, 4) if counted else 0.0
+    return {
+        "advancers": advancers,
+        "decliners": decliners,
+        "counted": counted,
+        "avg_change": avg_change,
+    }

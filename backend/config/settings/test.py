@@ -20,6 +20,9 @@ CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
 # Don't hit OpenSearch during tests (search is tested via mocks + DB fallback).
 SEARCH_ENABLED = False
 
+# Deterministic, offline market data in tests (no network to Stooq).
+MARKET_DATA_PROVIDER = "synthetic"
+
 # Run Celery tasks eagerly (synchronously) in tests.
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True

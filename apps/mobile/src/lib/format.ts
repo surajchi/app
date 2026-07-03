@@ -12,7 +12,9 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 function group(numStr: string): string {
   const negative = numStr.startsWith('-');
   const abs = negative ? numStr.slice(1) : numStr;
-  const [intPart, fracPart] = abs.split('.');
+  const dot = abs.indexOf('.');
+  const intPart = dot === -1 ? abs : abs.slice(0, dot);
+  const fracPart = dot === -1 ? '' : abs.slice(dot + 1);
   const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return `${negative ? '-' : ''}${grouped}${fracPart ? `.${fracPart}` : ''}`;
 }

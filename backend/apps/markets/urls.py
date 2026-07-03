@@ -3,6 +3,7 @@ from django.urls import path
 from apps.markets.views import (
     ExchangeListView,
     HistoryView,
+    InstrumentAnalysisView,
     InstrumentDetailView,
     InstrumentListView,
     MoversView,
@@ -18,4 +19,9 @@ urlpatterns = [
     path("instruments/<str:symbol>/", InstrumentDetailView.as_view(), name="instrument-detail"),
     path("instruments/<str:symbol>/quote/", QuoteView.as_view(), name="instrument-quote"),
     path("instruments/<str:symbol>/history/", HistoryView.as_view(), name="instrument-history"),
+    path(
+        "instruments/<str:symbol>/analysis/",
+        InstrumentAnalysisView.as_view(),
+        name="instrument-analysis",
+    ),
 ]

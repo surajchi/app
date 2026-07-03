@@ -117,26 +117,34 @@ export function WatchlistScreen({ navigation }: RootScreenProps<'Watchlist'>) {
           }
           renderItem={({ item }) => (
             <View className="mb-2 flex-row items-center justify-between rounded-2xl border border-slate-200 bg-white p-4">
-              <View className="flex-1">
-                <Text className="text-base font-semibold text-slate-900">
-                  {item.instrument.symbol}
-                </Text>
-                <Text className="text-sm text-slate-500" numberOfLines={1}>
-                  {item.instrument.name}
-                </Text>
-              </View>
-              <View className="items-end">
-                <Text className="text-base text-slate-900">
-                  {item.quote
-                    ? formatCurrency(item.quote.price, item.instrument.currency)
-                    : '—'}
-                </Text>
-                {item.quote ? (
-                  <Text className={`text-sm ${pnlColor(item.quote.change_percent)}`}>
-                    {formatPercent(item.quote.change_percent)}
+              <Pressable
+                accessibilityRole="button"
+                onPress={() =>
+                  navigation.navigate('InstrumentDetail', { symbol: item.instrument.symbol })
+                }
+                className="flex-1 flex-row items-center justify-between active:opacity-70"
+              >
+                <View className="flex-1">
+                  <Text className="text-base font-semibold text-slate-900">
+                    {item.instrument.symbol}
                   </Text>
-                ) : null}
-              </View>
+                  <Text className="text-sm text-slate-500" numberOfLines={1}>
+                    {item.instrument.name}
+                  </Text>
+                </View>
+                <View className="items-end">
+                  <Text className="text-base text-slate-900">
+                    {item.quote
+                      ? formatCurrency(item.quote.price, item.instrument.currency)
+                      : '—'}
+                  </Text>
+                  {item.quote ? (
+                    <Text className={`text-sm ${pnlColor(item.quote.change_percent)}`}>
+                      {formatPercent(item.quote.change_percent)}
+                    </Text>
+                  ) : null}
+                </View>
+              </Pressable>
               <Pressable
                 accessibilityRole="button"
                 onPress={() => removeItem.mutate(item.id)}

@@ -16,6 +16,7 @@ export interface Instrument {
   exchange: string | null;
   currency: string;
   is_active: boolean;
+  quote?: Quote | null;
 }
 
 export interface Quote {

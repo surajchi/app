@@ -8,6 +8,9 @@ export type RootStackParamList = {
   Watchlist: undefined;
   Portfolio: undefined;
   Alerts: undefined;
+  Markets: undefined;
+  News: undefined;
+  InstrumentDetail: { symbol: string };
 };
 
 export type RootScreenProps<T extends keyof RootStackParamList> = NativeStackScreenProps<

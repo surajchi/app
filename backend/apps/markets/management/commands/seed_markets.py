@@ -13,8 +13,22 @@ from django.core.management.base import BaseCommand
 
 from apps.markets import cache
 from apps.markets.constants import AssetClass, Interval
-from apps.markets.models import Exchange, Instrument, Market, PriceBar
+from apps.markets.models import Exchange, Instrument, Market, PriceBar, SymbolAlias
 from integrations.market_data.registry import get_provider
+
+# Our canonical symbol -> Yahoo Finance symbol (used when MARKET_DATA_PROVIDER=yahoo).
+YAHOO_SYMBOLS = {
+    "AAPL": "AAPL",
+    "MSFT": "MSFT",
+    "RELIANCE": "RELIANCE.NS",
+    "SPY": "SPY",
+    "NIFTY50": "^NSEI",
+    "SPX": "^GSPC",
+    "EURUSD": "EURUSD=X",
+    "USDINR": "USDINR=X",
+    "XAUUSD": "GC=F",
+    "BTCUSD": "BTC-USD",
+}
 
 EXCHANGES = [
     {"code": "NASDAQ", "name": "Nasdaq", "country": "US", "currency": "USD"},
@@ -42,7 +56,15 @@ BACKFILL_PERIODS = 180  # ~6 months of daily bars
 class Command(BaseCommand):
     help = "Seed market reference data and backfill historical bars."
 
+    def add_arguments(self, parser: Any) -> None:
+        parser.add_argument(
+            "--refresh",
+            action="store_true",
+            help="Re-fetch daily history and quotes even if bars already exist.",
+        )
+
     def handle(self, *args: Any, **options: Any) -> None:
+        refresh: bool = bool(options.get("refresh"))
         for code, ac in [("EQ", AssetClass.STOCK), ("FX", AssetClass.FOREX)]:
             Market.objects.get_or_create(code=code, defaults={"name": code, "asset_class": ac})
 
@@ -62,9 +84,22 @@ class Command(BaseCommand):
             )
             created += int(was_created)
 
+            # Resolve the provider-specific symbol and record it as an alias so the
+            # live poller (which looks up SymbolAlias) uses the same mapping.
+            yahoo_symbol = YAHOO_SYMBOLS.get(symbol, symbol)
+            SymbolAlias.objects.update_or_create(
+                instrument=instrument,
+                provider="yahoo",
+                defaults={"provider_symbol": yahoo_symbol},
+            )
+            psym = yahoo_symbol if provider.name == "yahoo" else symbol
+
             interval = str(Interval.D1)
-            if not PriceBar.objects.filter(instrument=instrument, interval=interval).exists():
-                bars = provider.get_history(symbol, interval, BACKFILL_PERIODS)
+            existing = PriceBar.objects.filter(instrument=instrument, interval=interval)
+            if refresh:
+                existing.delete()
+            if refresh or not existing.exists():
+                bars = provider.get_history(psym, interval, BACKFILL_PERIODS)
                 PriceBar.objects.bulk_create(
                     [
                         PriceBar(
@@ -84,7 +119,7 @@ class Command(BaseCommand):
                 )
 
             # Warm the latest-quote cache so /quote and /movers work immediately.
-            quote = provider.get_quote(symbol)
+            quote = provider.get_quote(psym)
             cache.set_quote(
                 instrument.id,
                 {

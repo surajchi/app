@@ -18,3 +18,5 @@ google-auth==2.37.0
 gunicorn==23.0.0
 uvicorn[standard]==0.34.0
 whitenoise==6.8.2
+# Optional error monitoring (activated only when SENTRY_DSN is set).
+sentry-sdk==2.20.0

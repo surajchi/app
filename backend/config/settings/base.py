@@ -66,6 +66,7 @@ LOCAL_APPS = [
     "apps.dashboard",
     "apps.administration",
     "apps.billing",
+    "apps.econcalendar",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -178,10 +179,20 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.billing.tasks.process_renewals",
         "schedule": env.float("BILLING_RENEWAL_INTERVAL", default=3600.0),
     },
+    "refresh-economic-calendar": {
+        "task": "apps.econcalendar.tasks.refresh_calendar",
+        "schedule": env.float("CALENDAR_REFRESH_INTERVAL", default=43200.0),  # 12h
+    },
+    "send-daily-brief": {
+        "task": "apps.dashboard.tasks.send_daily_brief",
+        "schedule": env.float("DAILY_BRIEF_INTERVAL", default=86400.0),  # 24h
+    },
 }
 
 # --- Market data ------------------------------------------------------------
-MARKET_DATA_PROVIDER = env.str("MARKET_DATA_PROVIDER", default="synthetic")
+# "yahoo" = free real quotes/history (no key) with synthetic fallback;
+# "synthetic" = fully offline deterministic data.
+MARKET_DATA_PROVIDER = env.str("MARKET_DATA_PROVIDER", default="yahoo")
 
 # --- Billing / Payments -----------------------------------------------------
 # Free mock provider by default (no keys). Swap for a real gateway when live.
@@ -319,3 +330,23 @@ LOGGING = {
         "finpulse": {"handlers": ["console"], "level": LOG_LEVEL, "propagate": False},
     },
 }
+
+# --- Error monitoring (optional) --------------------------------------------
+# No-op unless SENTRY_DSN is set, so dev/CI need nothing. The SDK is only
+# imported when a DSN is present, so the dependency is optional at runtime.
+SENTRY_DSN = env.str("SENTRY_DSN", default="")
+if SENTRY_DSN:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.celery import CeleryIntegration
+        from sentry_sdk.integrations.django import DjangoIntegration
+
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[DjangoIntegration(), CeleryIntegration()],
+            traces_sample_rate=env.float("SENTRY_TRACES_SAMPLE_RATE", default=0.0),
+            send_default_pii=False,
+            environment=env.str("ENV", default="local"),
+        )
+    except ImportError:  # SDK not installed — monitoring stays disabled.
+        pass
