@@ -7,6 +7,7 @@ import {
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import type { BadgeVariant } from '@/components/ui';
@@ -57,10 +58,11 @@ function clock(iso: string): string {
 
 function NewsTab() {
   const [category, setCategory] = useState('');
+  const [q, setQ] = useState('');
   const categoriesQuery = useQuery({ queryKey: ['news-categories'], queryFn: newsApi.categories });
   const feedQuery = useQuery({
-    queryKey: ['news-feed', category],
-    queryFn: () => newsApi.feed(category ? { category } : {}),
+    queryKey: ['news-feed', q.trim(), category],
+    queryFn: () => (q.trim() ? newsApi.search(q.trim()) : newsApi.feed(category ? { category } : {})),
   });
 
   const options = [
@@ -71,6 +73,13 @@ function NewsTab() {
   return (
     <>
       <View className="px-4 pb-2">
+        <TextInput
+          value={q}
+          onChangeText={setQ}
+          placeholder="Search news…"
+          placeholderTextColor="#64748b"
+          className="mb-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-base text-slate-100"
+        />
         <SegmentedControl options={options} value={category} onChange={setCategory} scroll />
       </View>
       {feedQuery.isLoading ? (

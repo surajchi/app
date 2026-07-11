@@ -7,6 +7,7 @@ import type { Instrument } from '@finpulse/types';
 import { InstrumentPicker } from '@/components/InstrumentPicker';
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { formatCurrency, formatPercent } from '@/lib/format';
 import { watchlistsApi } from '@/services/api/watchlists';
 import type { RootScreenProps } from '@/navigation/types';
@@ -18,9 +19,12 @@ function pnl(value: number): string {
 export function WatchlistScreen({ navigation }: RootScreenProps<'Watchlist'>) {
   const qc = useQueryClient();
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const listsQuery = useQuery({ queryKey: ['watchlists'], queryFn: watchlistsApi.list });
-  const selected = listsQuery.data?.find((w) => w.is_default) ?? listsQuery.data?.[0];
+  const lists = listsQuery.data ?? [];
+  const selected =
+    lists.find((w) => w.id === selectedId) ?? lists.find((w) => w.is_default) ?? lists[0];
 
   const detailQuery = useQuery({
     queryKey: ['watchlist', selected?.id],
@@ -35,8 +39,12 @@ export function WatchlistScreen({ navigation }: RootScreenProps<'Watchlist'>) {
   };
 
   const createList = useMutation({
-    mutationFn: () => watchlistsApi.create('My Watchlist', true),
-    onSuccess: invalidate,
+    mutationFn: () =>
+      watchlistsApi.create(lists.length === 0 ? 'My Watchlist' : `Watchlist ${lists.length + 1}`, lists.length === 0),
+    onSuccess: (created) => {
+      setSelectedId(created.id);
+      invalidate();
+    },
   });
 
   const addItem = useMutation({
@@ -81,6 +89,22 @@ export function WatchlistScreen({ navigation }: RootScreenProps<'Watchlist'>) {
           <Text className={`text-base ${selected ? 'text-emerald-400' : 'text-slate-600'}`}>+ Add</Text>
         </Pressable>
       </View>
+
+      {lists.length > 0 ? (
+        <View className="flex-row items-center px-4 pb-2">
+          <View className="flex-1">
+            <SegmentedControl
+              options={lists.map((l) => ({ label: l.name, value: l.id }))}
+              value={selected?.id ?? ''}
+              onChange={setSelectedId}
+              scroll
+            />
+          </View>
+          <Pressable onPress={() => createList.mutate()} className="ml-2" accessibilityRole="button">
+            <Text className="text-sm text-emerald-400">＋ New</Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       {!selected ? (
         <View className="flex-1 items-center justify-center px-8">

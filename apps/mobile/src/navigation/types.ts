@@ -12,6 +12,7 @@ export type RootStackParamList = {
   News: undefined;
   Notifications: undefined;
   Subscription: undefined;
+  Converter: undefined;
   InstrumentDetail: { symbol: string };
 };
 

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { AlertsScreen } from '@/screens/AlertsScreen';
+import { ConverterScreen } from '@/screens/ConverterScreen';
 import { HomeScreen } from '@/screens/HomeScreen';
 import { InstrumentDetailScreen } from '@/screens/InstrumentDetailScreen';
 import { LoginScreen } from '@/screens/LoginScreen';
@@ -50,6 +51,7 @@ export function RootNavigator() {
             <Stack.Screen name="News" component={NewsScreen} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
             <Stack.Screen name="Subscription" component={SubscriptionScreen} />
+            <Stack.Screen name="Converter" component={ConverterScreen} />
             <Stack.Screen name="InstrumentDetail" component={InstrumentDetailScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
           </>

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { AxiosError } from 'axios';
-import type { Instrument, NewTransaction, TransactionType } from '@finpulse/types';
+import type { Instrument, NewTransaction, Transaction, TransactionType } from '@finpulse/types';
 
 import { AllocationDonut } from '@/components/AllocationDonut';
 import { BottomNav } from '@/components/BottomNav';
@@ -21,6 +21,7 @@ import { InstrumentPicker } from '@/components/InstrumentPicker';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
 import { portfoliosApi } from '@/services/api/portfolios';
 import type { RootScreenProps } from '@/navigation/types';
@@ -135,9 +136,14 @@ function TradeModal({ visible, currency, submitting, onClose, onSubmit }: TradeM
 export function PortfolioScreen({ navigation }: RootScreenProps<'Portfolio'>) {
   const qc = useQueryClient();
   const [tradeOpen, setTradeOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const listQuery = useQuery({ queryKey: ['portfolios'], queryFn: portfoliosApi.list });
-  const selected = listQuery.data?.find((p) => p.is_default) ?? listQuery.data?.[0];
+  const portfolios = listQuery.data ?? [];
+  const selected =
+    portfolios.find((p) => p.id === selectedId) ??
+    portfolios.find((p) => p.is_default) ??
+    portfolios[0];
 
   const summaryQuery = useQuery({
     queryKey: ['portfolio-summary', selected?.id],
@@ -145,14 +151,29 @@ export function PortfolioScreen({ navigation }: RootScreenProps<'Portfolio'>) {
     enabled: Boolean(selected),
   });
 
+  const txnQuery = useQuery({
+    queryKey: ['portfolio-txns', selected?.id],
+    queryFn: () => portfoliosApi.transactions(selected!.id),
+    enabled: Boolean(selected),
+  });
+
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: ['portfolio-summary', selected?.id] });
+    void qc.invalidateQueries({ queryKey: ['portfolio-txns', selected?.id] });
     void qc.invalidateQueries({ queryKey: ['dashboard'] });
   };
 
   const createPortfolio = useMutation({
-    mutationFn: () => portfoliosApi.create('Main', 'USD', true),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['portfolios'] }),
+    mutationFn: () =>
+      portfoliosApi.create(
+        portfolios.length === 0 ? 'Main' : `Portfolio ${portfolios.length + 1}`,
+        'USD',
+        portfolios.length === 0
+      ),
+    onSuccess: (created) => {
+      setSelectedId(created.id);
+      void qc.invalidateQueries({ queryKey: ['portfolios'] });
+    },
   });
 
   const addTxn = useMutation({
@@ -195,6 +216,26 @@ export function PortfolioScreen({ navigation }: RootScreenProps<'Portfolio'>) {
           </Text>
         </Pressable>
       </View>
+
+      {portfolios.length > 0 ? (
+        <View className="flex-row items-center px-4 pb-2">
+          <View className="flex-1">
+            <SegmentedControl
+              options={portfolios.map((p) => ({ label: p.name, value: p.id }))}
+              value={selected?.id ?? ''}
+              onChange={setSelectedId}
+              scroll
+            />
+          </View>
+          <Pressable
+            onPress={() => createPortfolio.mutate()}
+            className="ml-2"
+            accessibilityRole="button"
+          >
+            <Text className="text-sm text-emerald-400">＋ New</Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       {!selected ? (
         <View className="flex-1 items-center justify-center px-8">
@@ -243,6 +284,33 @@ export function PortfolioScreen({ navigation }: RootScreenProps<'Portfolio'>) {
                 </Card>
               ) : null}
             </>
+          }
+          ListFooterComponent={
+            (txnQuery.data ?? []).length > 0 ? (
+              <View className="mt-4">
+                <Text className="mb-2 text-sm font-medium text-slate-400">Recent trades</Text>
+                {(txnQuery.data ?? []).slice(0, 10).map((t: Transaction) => (
+                  <View
+                    key={t.id}
+                    className="mb-1 flex-row items-center justify-between rounded-xl border border-slate-800 bg-slate-900 px-3 py-2.5"
+                  >
+                    <View className="flex-row items-center">
+                      <Text
+                        className={`mr-2 text-xs font-bold uppercase ${
+                          t.type === 'buy' ? 'text-emerald-400' : 'text-rose-400'
+                        }`}
+                      >
+                        {t.type}
+                      </Text>
+                      <Text className="text-sm text-slate-100">{t.instrument.symbol}</Text>
+                    </View>
+                    <Text className="text-sm text-slate-300">
+                      {formatNumber(Number(t.quantity))} @ {formatCurrency(Number(t.price), currency)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null
           }
           ListEmptyComponent={
             <Text className="mt-10 text-center text-slate-500">

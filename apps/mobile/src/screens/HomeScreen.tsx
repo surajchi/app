@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { BottomNav } from '@/components/BottomNav';
+import { InstrumentPicker } from '@/components/InstrumentPicker';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
 import { SentimentGauge } from '@/components/SentimentGauge';
@@ -35,6 +36,7 @@ export function HomeScreen({ navigation }: RootScreenProps<'Home'>) {
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const logout = useAuthStore((s) => s.logout);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['dashboard'],
@@ -86,6 +88,13 @@ export function HomeScreen({ navigation }: RootScreenProps<'Home'>) {
           {user?.full_name ?? user?.email ?? 'Trader'}
         </Text>
 
+        <Pressable
+          onPress={() => setSearchOpen(true)}
+          className="mb-4 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 active:bg-slate-800"
+        >
+          <Text className="text-slate-500">🔍  Search any market…</Text>
+        </Pressable>
+
         <View className="mb-4 flex-row flex-wrap">
           <NavPill label="Watchlist" onPress={() => navigation.navigate('Watchlist')} />
           <NavPill label="Alerts" onPress={() => navigation.navigate('Alerts')} />
@@ -94,6 +103,7 @@ export function HomeScreen({ navigation }: RootScreenProps<'Home'>) {
             onPress={() => navigation.navigate('Notifications')}
           />
           <NavPill label="Plans" onPress={() => navigation.navigate('Subscription')} />
+          <NavPill label="Convert" onPress={() => navigation.navigate('Converter')} />
         </View>
 
         <Card className="mb-4" onPress={() => navigation.navigate('News')}>
@@ -239,6 +249,11 @@ export function HomeScreen({ navigation }: RootScreenProps<'Home'>) {
           </>
         )}
       </ScrollView>
+      <InstrumentPicker
+        visible={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onSelect={(inst) => navigation.navigate('InstrumentDetail', { symbol: inst.symbol })}
+      />
       <BottomNav active="home" />
     </Screen>
   );

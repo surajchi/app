@@ -17,4 +17,7 @@ export const newsApi = {
 
   categories: (): Promise<NewsCategory[]> =>
     unwrap(client.get<ApiSuccess<NewsCategory[]>>('/news/categories/')),
+
+  search: (q: string): Promise<NewsArticle[]> =>
+    unwrap(client.get<ApiSuccess<NewsArticle[]>>('/news/search/', { params: { q } })),
 };
