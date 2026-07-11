@@ -12,6 +12,7 @@ import {
 import type { BadgeVariant } from '@/components/ui';
 import type { EconomicEvent, SentimentLabel } from '@finpulse/types';
 
+import { BottomNav } from '@/components/BottomNav';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
@@ -182,7 +183,8 @@ export function NewsScreen({ navigation }: RootScreenProps<'News'>) {
       <View className="px-4 pb-2">
         <SegmentedControl options={TABS} value={tab} onChange={setTab} />
       </View>
-      {tab === 'news' ? <NewsTab /> : <CalendarTab />}
+      <View className="flex-1">{tab === 'news' ? <NewsTab /> : <CalendarTab />}</View>
+      <BottomNav active="news" />
     </Screen>
   );
 }

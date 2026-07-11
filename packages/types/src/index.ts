@@ -12,3 +12,5 @@ export * from './dashboard';
 export * from './news';
 export * from './calendar';
 export * from './brief';
+export * from './notifications';
+export * from './billing';

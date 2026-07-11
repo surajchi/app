@@ -1,23 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  Text,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import type { AxiosError } from 'axios';
 import type { Instrument } from '@finpulse/types';
 
-import { Button } from '@/components/common/Button';
 import { InstrumentPicker } from '@/components/InstrumentPicker';
-import { formatCurrency, formatPercent, pnlColor } from '@/lib/format';
+import { Button } from '@/components/ui/Button';
+import { Screen } from '@/components/ui/Screen';
+import { formatCurrency, formatPercent } from '@/lib/format';
 import { watchlistsApi } from '@/services/api/watchlists';
 import type { RootScreenProps } from '@/navigation/types';
+
+function pnl(value: number): string {
+  return value >= 0 ? 'text-emerald-400' : 'text-rose-400';
+}
 
 export function WatchlistScreen({ navigation }: RootScreenProps<'Watchlist'>) {
   const qc = useQueryClient();
@@ -64,35 +60,31 @@ export function WatchlistScreen({ navigation }: RootScreenProps<'Watchlist'>) {
 
   if (listsQuery.isLoading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-slate-50">
-        <ActivityIndicator color="#4f46e5" />
-      </SafeAreaView>
+      <Screen className="items-center justify-center">
+        <ActivityIndicator color="#34d399" />
+      </Screen>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50">
+    <Screen>
       <View className="flex-row items-center justify-between px-4 py-3">
         <Pressable onPress={() => navigation.goBack()} accessibilityRole="button">
-          <Text className="text-base text-brand-600">‹ Back</Text>
+          <Text className="text-base text-slate-300">‹ Back</Text>
         </Pressable>
-        <Text className="text-lg font-semibold text-slate-900">
-          {selected?.name ?? 'Watchlist'}
-        </Text>
+        <Text className="text-lg font-semibold text-slate-50">{selected?.name ?? 'Watchlist'}</Text>
         <Pressable
           onPress={() => selected && setPickerOpen(true)}
           disabled={!selected}
           accessibilityRole="button"
         >
-          <Text className={`text-base ${selected ? 'text-brand-600' : 'text-slate-300'}`}>+ Add</Text>
+          <Text className={`text-base ${selected ? 'text-emerald-400' : 'text-slate-600'}`}>+ Add</Text>
         </Pressable>
       </View>
 
       {!selected ? (
         <View className="flex-1 items-center justify-center px-8">
-          <Text className="mb-4 text-center text-slate-500">
-            You don't have a watchlist yet.
-          </Text>
+          <Text className="mb-4 text-center text-slate-400">You don&apos;t have a watchlist yet.</Text>
           <Button
             title="Create watchlist"
             loading={createList.isPending}
@@ -106,17 +98,16 @@ export function WatchlistScreen({ navigation }: RootScreenProps<'Watchlist'>) {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
           refreshControl={
             <RefreshControl
+              tintColor="#34d399"
               refreshing={detailQuery.isRefetching}
               onRefresh={() => void detailQuery.refetch()}
             />
           }
           ListEmptyComponent={
-            <Text className="mt-10 text-center text-slate-400">
-              No instruments yet. Tap “+ Add”.
-            </Text>
+            <Text className="mt-10 text-center text-slate-500">No instruments yet. Tap “+ Add”.</Text>
           }
           renderItem={({ item }) => (
-            <View className="mb-2 flex-row items-center justify-between rounded-2xl border border-slate-200 bg-white p-4">
+            <View className="mb-2 flex-row items-center justify-between rounded-2xl border border-slate-800 bg-slate-900 p-4">
               <Pressable
                 accessibilityRole="button"
                 onPress={() =>
@@ -125,21 +116,19 @@ export function WatchlistScreen({ navigation }: RootScreenProps<'Watchlist'>) {
                 className="flex-1 flex-row items-center justify-between active:opacity-70"
               >
                 <View className="flex-1">
-                  <Text className="text-base font-semibold text-slate-900">
+                  <Text className="text-base font-semibold text-slate-50">
                     {item.instrument.symbol}
                   </Text>
-                  <Text className="text-sm text-slate-500" numberOfLines={1}>
+                  <Text className="text-sm text-slate-400" numberOfLines={1}>
                     {item.instrument.name}
                   </Text>
                 </View>
                 <View className="items-end">
-                  <Text className="text-base text-slate-900">
-                    {item.quote
-                      ? formatCurrency(item.quote.price, item.instrument.currency)
-                      : '—'}
+                  <Text className="text-base text-slate-100">
+                    {item.quote ? formatCurrency(item.quote.price, item.instrument.currency) : '—'}
                   </Text>
                   {item.quote ? (
-                    <Text className={`text-sm ${pnlColor(item.quote.change_percent)}`}>
+                    <Text className={`text-sm ${pnl(item.quote.change_percent)}`}>
                       {formatPercent(item.quote.change_percent)}
                     </Text>
                   ) : null}
@@ -148,9 +137,9 @@ export function WatchlistScreen({ navigation }: RootScreenProps<'Watchlist'>) {
               <Pressable
                 accessibilityRole="button"
                 onPress={() => removeItem.mutate(item.id)}
-                className="ml-4 h-8 w-8 items-center justify-center rounded-full bg-slate-100 active:bg-slate-200"
+                className="ml-4 h-8 w-8 items-center justify-center rounded-full bg-slate-800 active:bg-slate-700"
               >
-                <Text className="text-slate-500">✕</Text>
+                <Text className="text-slate-400">✕</Text>
               </Pressable>
             </View>
           )}
@@ -162,6 +151,6 @@ export function WatchlistScreen({ navigation }: RootScreenProps<'Watchlist'>) {
         onClose={() => setPickerOpen(false)}
         onSelect={(instrument) => addItem.mutate(instrument)}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }

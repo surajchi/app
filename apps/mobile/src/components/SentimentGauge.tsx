@@ -37,11 +37,11 @@ export function SentimentGauge({ index }: { index: SentimentIndex }) {
     total > 0 ? `${index.advancers}/${total} advancing` : 'Breadth neutral';
 
   return (
-    <View className="mt-3 rounded-lg border border-slate-100 bg-white px-3 py-3">
+    <View className="mt-3 rounded-lg border border-slate-800 bg-slate-950 px-3 py-3">
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-xs font-medium uppercase text-slate-400">Fear & Greed</Text>
-          <Text className="mt-0.5 text-lg font-bold text-slate-900">{index.label}</Text>
+          <Text className="text-xs font-medium uppercase text-slate-500">Fear &amp; Greed</Text>
+          <Text className="mt-0.5 text-lg font-bold text-slate-50">{index.label}</Text>
         </View>
         <Text style={{ color }} className="text-3xl font-bold">
           {score}
@@ -52,7 +52,7 @@ export function SentimentGauge({ index }: { index: SentimentIndex }) {
         <Svg width={140} height={72} viewBox="0 0 120 72">
           <Path
             d={arcPath(60, 60, 42, 0, 180)}
-            stroke="#e2e8f0"
+            stroke="#1e293b"
             strokeWidth={12}
             strokeLinecap="round"
             fill="none"
@@ -69,9 +69,9 @@ export function SentimentGauge({ index }: { index: SentimentIndex }) {
       </View>
 
       <View className="mt-1 flex-row justify-between">
-        <Text className="text-xs text-slate-400">Fear</Text>
-        <Text className="text-xs font-medium text-slate-500">{breadth}</Text>
-        <Text className="text-xs text-slate-400">Greed</Text>
+        <Text className="text-xs text-slate-500">Fear</Text>
+        <Text className="text-xs font-medium text-slate-400">{breadth}</Text>
+        <Text className="text-xs text-slate-500">Greed</Text>
       </View>
     </View>
   );

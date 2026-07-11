@@ -10,6 +10,8 @@ export type RootStackParamList = {
   Alerts: undefined;
   Markets: undefined;
   News: undefined;
+  Notifications: undefined;
+  Subscription: undefined;
   InstrumentDetail: { symbol: string };
 };
 

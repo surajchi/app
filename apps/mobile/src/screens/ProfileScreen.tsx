@@ -1,19 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/common/Button';
+import { BottomNav } from '@/components/BottomNav';
 import { TextField } from '@/components/common/TextField';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Screen } from '@/components/ui/Screen';
+import { billingApi } from '@/services/api/billing';
+import { extractErrorMessage } from '@/services/api/errors';
 import { profileApi } from '@/services/api/profile';
 import { usersApi } from '@/services/api/users';
-import { extractErrorMessage } from '@/services/api/errors';
+import type { RootScreenProps } from '@/navigation/types';
 
-export function ProfileScreen() {
+export function ProfileScreen({ navigation }: RootScreenProps<'Profile'>) {
   const queryClient = useQueryClient();
 
   const meQuery = useQuery({ queryKey: ['me'], queryFn: usersApi.me });
   const profileQuery = useQuery({ queryKey: ['profile'], queryFn: profileApi.get });
+  const subQuery = useQuery({ queryKey: ['subscription'], queryFn: billingApi.subscription });
 
   const [fullName, setFullName] = useState('');
   const [baseCurrency, setBaseCurrency] = useState('');
@@ -48,27 +53,38 @@ export function ProfileScreen() {
 
   if (meQuery.isLoading || profileQuery.isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator color="#4f46e5" />
-      </View>
+      <Screen className="items-center justify-center">
+        <ActivityIndicator color="#34d399" />
+      </Screen>
     );
   }
 
   const me = meQuery.data;
+  const plan = subQuery.data?.entitlements.plan ?? 'free';
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
+    <Screen>
       <ScrollView contentContainerStyle={{ padding: 24 }}>
-        <Text className="mb-1 text-sm uppercase tracking-wide text-slate-400">Account</Text>
-        <Text className="mb-4 text-2xl font-bold text-slate-900">{me?.email}</Text>
+        <Text className="mb-1 text-sm uppercase tracking-wide text-slate-500">Account</Text>
+        <Text className="mb-4 text-2xl font-bold text-slate-50">{me?.email}</Text>
 
         <View className="mb-6 flex-row flex-wrap gap-2">
           {(me?.roles ?? []).map((role) => (
-            <View key={role} className="rounded-full bg-indigo-100 px-3 py-1">
-              <Text className="text-xs font-semibold text-brand-600">{role}</Text>
+            <View key={role} className="rounded-full bg-emerald-500/15 px-3 py-1">
+              <Text className="text-xs font-semibold text-emerald-400">{role}</Text>
             </View>
           ))}
         </View>
+
+        <Card className="mb-6" onPress={() => navigation.navigate('Subscription')}>
+          <View className="flex-row items-center justify-between">
+            <View>
+              <Text className="text-xs uppercase text-slate-500">Plan</Text>
+              <Text className="text-lg font-bold uppercase text-slate-50">{plan}</Text>
+            </View>
+            <Text className="text-sm text-emerald-400">Manage ›</Text>
+          </View>
+        </Card>
 
         <TextField label="Full name" value={fullName} onChangeText={setFullName} />
         <TextField
@@ -79,19 +95,20 @@ export function ProfileScreen() {
           onChangeText={setBaseCurrency}
         />
 
-        {message ? <Text className="mb-3 text-sm text-green-600">{message}</Text> : null}
-        {error ? <Text className="mb-3 text-sm text-red-500">{error}</Text> : null}
+        {message ? <Text className="mb-3 text-sm text-emerald-400">{message}</Text> : null}
+        {error ? <Text className="mb-3 text-sm text-rose-400">{error}</Text> : null}
 
         <Button title="Save changes" loading={save.isPending} onPress={() => save.mutate()} />
 
-        <View className="mt-8 rounded-2xl border border-slate-200 p-4">
-          <Text className="mb-1 text-xs uppercase text-slate-400">Preferences</Text>
-          <Text className="text-slate-600">
+        <View className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-4">
+          <Text className="mb-1 text-xs uppercase text-slate-500">Preferences</Text>
+          <Text className="text-slate-300">
             Language: {profileQuery.data?.language} · Risk: {profileQuery.data?.risk_appetite} ·
             Experience: {profileQuery.data?.experience_level}
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+      <BottomNav active="profile" />
+    </Screen>
   );
 }

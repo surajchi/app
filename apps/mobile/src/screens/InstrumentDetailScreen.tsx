@@ -18,6 +18,7 @@ import { formatCurrency, formatPercent } from '@/lib/format';
 import { alertsApi } from '@/services/api/alerts';
 import { marketsApi } from '@/services/api/markets';
 import { watchlistsApi } from '@/services/api/watchlists';
+import { useMarketStream } from '@/services/websocket/useMarketStream';
 import type { RootScreenProps } from '@/navigation/types';
 
 const TIMEFRAMES: { key: string; days: number }[] = [
@@ -133,8 +134,9 @@ export function InstrumentDetailScreen({ route, navigation }: RootScreenProps<'I
   const shownCloses = closes.slice(Math.max(0, closes.length - days));
   const forecastMeans = (data?.forecast?.points ?? []).map((p) => p.mean);
 
-  const price = data?.quote?.price ?? closes[closes.length - 1] ?? null;
-  const changePct = data?.quote?.change_percent ?? 0;
+  const live = useMarketStream(data ? symbol : null);
+  const price = live?.price ?? data?.quote?.price ?? closes[closes.length - 1] ?? null;
+  const changePct = live?.change_percent ?? data?.quote?.change_percent ?? 0;
   const changeColor = changePct >= 0 ? 'text-emerald-400' : 'text-rose-400';
 
   const tech = data?.technical?.indicators;
@@ -153,8 +155,10 @@ export function InstrumentDetailScreen({ route, navigation }: RootScreenProps<'I
           <Text className="text-base text-slate-300">‹ Back</Text>
         </Pressable>
         <View className="flex-row items-center">
-          <View className="mr-2 h-2 w-2 rounded-full bg-emerald-400" />
-          <Text className="text-xs uppercase tracking-wide text-slate-500">Live</Text>
+          <View className={`mr-2 h-2 w-2 rounded-full ${live ? 'bg-emerald-400' : 'bg-slate-600'}`} />
+          <Text className="text-xs uppercase tracking-wide text-slate-500">
+            {live ? 'Live' : 'Delayed'}
+          </Text>
         </View>
       </View>
 

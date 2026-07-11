@@ -14,9 +14,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { AlertTriggerType, Instrument, NewAlertRule } from '@finpulse/types';
 
-import { Button } from '@/components/common/Button';
-import { Card } from '@/components/common/Card';
 import { InstrumentPicker } from '@/components/InstrumentPicker';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Screen } from '@/components/ui/Screen';
 import { alertsApi } from '@/services/api/alerts';
 import type { RootScreenProps } from '@/navigation/types';
 
@@ -43,37 +44,37 @@ function CreateAlertModal({ visible, submitting, onClose, onSubmit }: CreateModa
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <SafeAreaView className="flex-1 bg-white">
-        <View className="flex-row items-center justify-between border-b border-slate-100 px-4 py-3">
-          <Text className="text-lg font-semibold text-slate-900">New price alert</Text>
+      <SafeAreaView className="flex-1 bg-slate-950">
+        <View className="flex-row items-center justify-between border-b border-slate-800 px-4 py-3">
+          <Text className="text-lg font-semibold text-slate-50">New price alert</Text>
           <Pressable onPress={onClose} accessibilityRole="button">
-            <Text className="text-base font-medium text-brand-600">Close</Text>
+            <Text className="text-base font-medium text-emerald-400">Close</Text>
           </Pressable>
         </View>
 
         <View className="px-4 py-4">
-          <Text className="mb-1 text-sm font-medium text-slate-500">Instrument</Text>
+          <Text className="mb-1 text-sm font-medium text-slate-400">Instrument</Text>
           <Pressable
             onPress={() => setPickerOpen(true)}
-            className="mb-4 rounded-xl border border-slate-200 px-4 py-3 active:bg-slate-50"
+            className="mb-4 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 active:bg-slate-800"
           >
-            <Text className={instrument ? 'text-slate-900' : 'text-slate-400'}>
+            <Text className={instrument ? 'text-slate-100' : 'text-slate-500'}>
               {instrument ? `${instrument.symbol} — ${instrument.name}` : 'Select instrument…'}
             </Text>
           </Pressable>
 
-          <Text className="mb-1 text-sm font-medium text-slate-500">Condition</Text>
+          <Text className="mb-1 text-sm font-medium text-slate-400">Condition</Text>
           <View className="mb-4 flex-row">
             {PRICE_TRIGGERS.map((t) => (
               <Pressable
                 key={t.key}
                 onPress={() => setTrigger(t.key)}
                 className={`mr-2 flex-1 items-center rounded-xl border py-3 ${
-                  trigger === t.key ? 'border-brand-600 bg-brand-600' : 'border-slate-200'
+                  trigger === t.key ? 'border-emerald-500 bg-emerald-500' : 'border-slate-800'
                 }`}
               >
                 <Text
-                  className={`text-xs ${trigger === t.key ? 'font-semibold text-white' : 'text-slate-600'}`}
+                  className={`text-xs ${trigger === t.key ? 'font-semibold text-slate-950' : 'text-slate-300'}`}
                 >
                   {t.label}
                 </Text>
@@ -81,7 +82,7 @@ function CreateAlertModal({ visible, submitting, onClose, onSubmit }: CreateModa
             ))}
           </View>
 
-          <Text className="mb-1 text-sm font-medium text-slate-500">
+          <Text className="mb-1 text-sm font-medium text-slate-400">
             {trigger === 'pct_change' ? 'Percent (%)' : 'Threshold price'}
           </Text>
           <TextInput
@@ -89,7 +90,8 @@ function CreateAlertModal({ visible, submitting, onClose, onSubmit }: CreateModa
             onChangeText={setValue}
             keyboardType="decimal-pad"
             placeholder="0"
-            className="mb-6 rounded-xl border border-slate-200 px-4 py-3 text-base text-slate-900"
+            placeholderTextColor="#64748b"
+            className="mb-6 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-base text-slate-100"
           />
 
           <Button
@@ -150,31 +152,31 @@ export function AlertsScreen({ navigation }: RootScreenProps<'Alerts'>) {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50">
+    <Screen>
       <View className="flex-row items-center justify-between px-4 py-3">
         <Pressable onPress={() => navigation.goBack()} accessibilityRole="button">
-          <Text className="text-base text-brand-600">‹ Back</Text>
+          <Text className="text-base text-slate-300">‹ Back</Text>
         </Pressable>
-        <Text className="text-lg font-semibold text-slate-900">Alerts</Text>
+        <Text className="text-lg font-semibold text-slate-50">Alerts</Text>
         <Pressable onPress={() => setCreateOpen(true)} accessibilityRole="button">
-          <Text className="text-base text-brand-600">+ New</Text>
+          <Text className="text-base text-emerald-400">+ New</Text>
         </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <Text className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <Text className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
           Rules
         </Text>
         {rulesQuery.isLoading ? (
-          <ActivityIndicator color="#4f46e5" />
+          <ActivityIndicator color="#34d399" />
         ) : (rulesQuery.data ?? []).length === 0 ? (
-          <Text className="mb-4 text-slate-400">No alert rules yet. Tap “+ New”.</Text>
+          <Text className="mb-4 text-slate-500">No alert rules yet. Tap “+ New”.</Text>
         ) : (
           rulesQuery.data!.map((rule) => (
             <Card key={rule.id} className="mb-2">
               <View className="flex-row items-center justify-between">
                 <View className="flex-1 pr-3">
-                  <Text className="text-base font-semibold text-slate-900">{rule.name}</Text>
+                  <Text className="text-base font-semibold text-slate-50">{rule.name}</Text>
                   <Text className="text-xs text-slate-500">
                     {rule.trigger_type} · {rule.frequency}
                     {rule.last_triggered_at ? ' · fired' : ''}
@@ -196,25 +198,25 @@ export function AlertsScreen({ navigation }: RootScreenProps<'Alerts'>) {
                       },
                     ])
                   }
-                  className="ml-3 h-8 w-8 items-center justify-center rounded-full bg-slate-100 active:bg-slate-200"
+                  className="ml-3 h-8 w-8 items-center justify-center rounded-full bg-slate-800 active:bg-slate-700"
                 >
-                  <Text className="text-slate-500">✕</Text>
+                  <Text className="text-slate-400">✕</Text>
                 </Pressable>
               </View>
             </Card>
           ))
         )}
 
-        <Text className="mb-2 mt-6 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <Text className="mb-2 mt-6 text-sm font-semibold uppercase tracking-wide text-slate-500">
           History
         </Text>
         {(historyQuery.data ?? []).length === 0 ? (
-          <Text className="text-slate-400">Nothing triggered yet.</Text>
+          <Text className="text-slate-500">Nothing triggered yet.</Text>
         ) : (
           historyQuery.data!.map((fired) => (
-            <View key={fired.id} className="mb-2 rounded-xl border border-slate-200 bg-white p-3">
-              <Text className="text-sm font-medium text-slate-800">{fired.rule_name}</Text>
-              <Text className="text-xs text-slate-400">
+            <View key={fired.id} className="mb-2 rounded-xl border border-slate-800 bg-slate-900 p-3">
+              <Text className="text-sm font-medium text-slate-100">{fired.rule_name}</Text>
+              <Text className="text-xs text-slate-500">
                 {fired.trigger_type} · {new Date(fired.triggered_at).toLocaleString()}
               </Text>
             </View>
@@ -228,6 +230,6 @@ export function AlertsScreen({ navigation }: RootScreenProps<'Alerts'>) {
         onClose={() => setCreateOpen(false)}
         onSubmit={(rule) => createRule.mutate(rule)}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }

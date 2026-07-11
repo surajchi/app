@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from 'react-native';
 
+import { BottomNav } from '@/components/BottomNav';
 import { Badge } from '@/components/ui';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
@@ -145,6 +146,7 @@ export function MarketsScreen({ navigation }: RootScreenProps<'Markets'>) {
           )}
         />
       )}
+      <BottomNav active="markets" />
     </Screen>
   );
 }

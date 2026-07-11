@@ -9,9 +9,11 @@ import { InstrumentDetailScreen } from '@/screens/InstrumentDetailScreen';
 import { LoginScreen } from '@/screens/LoginScreen';
 import { MarketsScreen } from '@/screens/MarketsScreen';
 import { NewsScreen } from '@/screens/NewsScreen';
+import { NotificationsScreen } from '@/screens/NotificationsScreen';
 import { PortfolioScreen } from '@/screens/PortfolioScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { RegisterScreen } from '@/screens/RegisterScreen';
+import { SubscriptionScreen } from '@/screens/SubscriptionScreen';
 import { WatchlistScreen } from '@/screens/WatchlistScreen';
 import { useAuthStore } from '@/store/authStore';
 import type { RootStackParamList } from './types';
@@ -46,12 +48,10 @@ export function RootNavigator() {
             <Stack.Screen name="Alerts" component={AlertsScreen} />
             <Stack.Screen name="Markets" component={MarketsScreen} />
             <Stack.Screen name="News" component={NewsScreen} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
+            <Stack.Screen name="Subscription" component={SubscriptionScreen} />
             <Stack.Screen name="InstrumentDetail" component={InstrumentDetailScreen} />
-            <Stack.Screen
-              name="Profile"
-              component={ProfileScreen}
-              options={{ headerShown: true, title: 'Profile' }}
-            />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
           </>
         ) : (
           <>

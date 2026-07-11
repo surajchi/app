@@ -15,12 +15,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { AxiosError } from 'axios';
 import type { Instrument, NewTransaction, TransactionType } from '@finpulse/types';
 
-import { Button } from '@/components/common/Button';
-import { Card } from '@/components/common/Card';
+import { AllocationDonut } from '@/components/AllocationDonut';
+import { BottomNav } from '@/components/BottomNav';
 import { InstrumentPicker } from '@/components/InstrumentPicker';
-import { formatCurrency, formatNumber, formatPercent, pnlColor } from '@/lib/format';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Screen } from '@/components/ui/Screen';
+import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
 import { portfoliosApi } from '@/services/api/portfolios';
 import type { RootScreenProps } from '@/navigation/types';
+
+function pnl(value: number): string {
+  return value >= 0 ? 'text-emerald-400' : 'text-rose-400';
+}
 
 interface TradeModalProps {
   visible: boolean;
@@ -48,21 +55,21 @@ function TradeModal({ visible, currency, submitting, onClose, onSubmit }: TradeM
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <SafeAreaView className="flex-1 bg-white">
-        <View className="flex-row items-center justify-between border-b border-slate-100 px-4 py-3">
-          <Text className="text-lg font-semibold text-slate-900">Record trade</Text>
+      <SafeAreaView className="flex-1 bg-slate-950">
+        <View className="flex-row items-center justify-between border-b border-slate-800 px-4 py-3">
+          <Text className="text-lg font-semibold text-slate-50">Record trade</Text>
           <Pressable onPress={onClose} accessibilityRole="button">
-            <Text className="text-base font-medium text-brand-600">Close</Text>
+            <Text className="text-base font-medium text-emerald-400">Close</Text>
           </Pressable>
         </View>
 
         <View className="px-4 py-4">
-          <Text className="mb-1 text-sm font-medium text-slate-500">Instrument</Text>
+          <Text className="mb-1 text-sm font-medium text-slate-400">Instrument</Text>
           <Pressable
             onPress={() => setPickerOpen(true)}
-            className="mb-4 rounded-xl border border-slate-200 px-4 py-3 active:bg-slate-50"
+            className="mb-4 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 active:bg-slate-800"
           >
-            <Text className={instrument ? 'text-slate-900' : 'text-slate-400'}>
+            <Text className={instrument ? 'text-slate-100' : 'text-slate-500'}>
               {instrument ? `${instrument.symbol} — ${instrument.name}` : 'Select instrument…'}
             </Text>
           </Pressable>
@@ -73,32 +80,34 @@ function TradeModal({ visible, currency, submitting, onClose, onSubmit }: TradeM
                 key={t}
                 onPress={() => setType(t)}
                 className={`mr-2 flex-1 items-center rounded-xl border py-3 ${
-                  type === t ? 'border-brand-600 bg-brand-600' : 'border-slate-200'
+                  type === t ? 'border-emerald-500 bg-emerald-500' : 'border-slate-800'
                 }`}
               >
-                <Text className={type === t ? 'font-semibold text-white' : 'text-slate-600'}>
+                <Text className={type === t ? 'font-semibold text-slate-950' : 'text-slate-300'}>
                   {t.toUpperCase()}
                 </Text>
               </Pressable>
             ))}
           </View>
 
-          <Text className="mb-1 text-sm font-medium text-slate-500">Quantity</Text>
+          <Text className="mb-1 text-sm font-medium text-slate-400">Quantity</Text>
           <TextInput
             value={quantity}
             onChangeText={setQuantity}
             keyboardType="decimal-pad"
             placeholder="0"
-            className="mb-4 rounded-xl border border-slate-200 px-4 py-3 text-base text-slate-900"
+            placeholderTextColor="#64748b"
+            className="mb-4 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-base text-slate-100"
           />
 
-          <Text className="mb-1 text-sm font-medium text-slate-500">Price ({currency})</Text>
+          <Text className="mb-1 text-sm font-medium text-slate-400">Price ({currency})</Text>
           <TextInput
             value={price}
             onChangeText={setPrice}
             keyboardType="decimal-pad"
             placeholder="0.00"
-            className="mb-6 rounded-xl border border-slate-200 px-4 py-3 text-base text-slate-900"
+            placeholderTextColor="#64748b"
+            className="mb-6 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-base text-slate-100"
           />
 
           <Button
@@ -107,12 +116,7 @@ function TradeModal({ visible, currency, submitting, onClose, onSubmit }: TradeM
             disabled={!canSubmit}
             onPress={() => {
               if (!instrument) return;
-              onSubmit({
-                instrument_id: instrument.id,
-                type,
-                quantity,
-                price: price || '0',
-              });
+              onSubmit({ instrument_id: instrument.id, type, quantity, price: price || '0' });
               reset();
             }}
           />
@@ -164,28 +168,29 @@ export function PortfolioScreen({ navigation }: RootScreenProps<'Portfolio'>) {
 
   if (listQuery.isLoading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-slate-50">
-        <ActivityIndicator color="#4f46e5" />
-      </SafeAreaView>
+      <Screen className="items-center justify-center">
+        <ActivityIndicator color="#34d399" />
+      </Screen>
     );
   }
 
   const currency = selected?.base_currency ?? 'USD';
   const totals = summaryQuery.data?.totals;
+  const positions = summaryQuery.data?.positions ?? [];
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50">
+    <Screen>
       <View className="flex-row items-center justify-between px-4 py-3">
         <Pressable onPress={() => navigation.goBack()} accessibilityRole="button">
-          <Text className="text-base text-brand-600">‹ Back</Text>
+          <Text className="text-base text-slate-300">‹ Back</Text>
         </Pressable>
-        <Text className="text-lg font-semibold text-slate-900">{selected?.name ?? 'Portfolio'}</Text>
+        <Text className="text-lg font-semibold text-slate-50">{selected?.name ?? 'Portfolio'}</Text>
         <Pressable
           onPress={() => selected && setTradeOpen(true)}
           disabled={!selected}
           accessibilityRole="button"
         >
-          <Text className={`text-base ${selected ? 'text-brand-600' : 'text-slate-300'}`}>
+          <Text className={`text-base ${selected ? 'text-emerald-400' : 'text-slate-600'}`}>
             + Trade
           </Text>
         </Pressable>
@@ -193,7 +198,7 @@ export function PortfolioScreen({ navigation }: RootScreenProps<'Portfolio'>) {
 
       {!selected ? (
         <View className="flex-1 items-center justify-center px-8">
-          <Text className="mb-4 text-center text-slate-500">No portfolio yet.</Text>
+          <Text className="mb-4 text-center text-slate-400">No portfolio yet.</Text>
           <Button
             title="Create portfolio"
             loading={createPortfolio.isPending}
@@ -202,55 +207,65 @@ export function PortfolioScreen({ navigation }: RootScreenProps<'Portfolio'>) {
         </View>
       ) : (
         <FlatList
-          data={summaryQuery.data?.positions ?? []}
+          data={positions}
           keyExtractor={(p) => p.instrument_id}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
           refreshControl={
             <RefreshControl
+              tintColor="#34d399"
               refreshing={summaryQuery.isRefetching}
               onRefresh={() => void summaryQuery.refetch()}
             />
           }
           ListHeaderComponent={
-            <Card className="mb-4">
-              <Text className="text-sm font-medium text-slate-500">Total value</Text>
-              <Text className="text-3xl font-bold text-slate-900">
-                {formatCurrency(totals?.market_value ?? 0, currency)}
-              </Text>
-              {totals ? (
-                <Text className={`mt-1 text-base font-semibold ${pnlColor(totals.unrealized_pnl)}`}>
-                  {formatCurrency(totals.unrealized_pnl, currency)} ({formatPercent(totals.unrealized_pct)})
+            <>
+              <Card className="mb-4">
+                <Text className="text-sm font-medium text-slate-400">Total value</Text>
+                <Text className="text-3xl font-bold text-slate-50">
+                  {formatCurrency(totals?.market_value ?? 0, currency)}
                 </Text>
+                {totals ? (
+                  <Text className={`mt-1 text-base font-semibold ${pnl(totals.unrealized_pnl)}`}>
+                    {formatCurrency(totals.unrealized_pnl, currency)} ({formatPercent(totals.unrealized_pct)})
+                  </Text>
+                ) : null}
+                {totals && totals.realized_pnl !== 0 ? (
+                  <Text className="mt-1 text-xs text-slate-500">
+                    Realized: {formatCurrency(totals.realized_pnl, currency)}
+                  </Text>
+                ) : null}
+              </Card>
+
+              {positions.length > 0 ? (
+                <Card className="mb-4">
+                  <Text className="mb-3 text-sm font-medium text-slate-400">Allocation</Text>
+                  <AllocationDonut positions={positions} />
+                </Card>
               ) : null}
-              {totals && totals.realized_pnl !== 0 ? (
-                <Text className="mt-1 text-xs text-slate-400">
-                  Realized: {formatCurrency(totals.realized_pnl, currency)}
-                </Text>
-              ) : null}
-            </Card>
+            </>
           }
           ListEmptyComponent={
-            <Text className="mt-10 text-center text-slate-400">
+            <Text className="mt-10 text-center text-slate-500">
               No holdings. Tap “+ Trade” to record a buy.
             </Text>
           }
           renderItem={({ item }) => (
-            <View className="mb-2 rounded-2xl border border-slate-200 bg-white p-4">
+            <View className="mb-2 rounded-2xl border border-slate-800 bg-slate-900 p-4">
               <View className="flex-row items-center justify-between">
-                <Text className="text-base font-semibold text-slate-900">{item.symbol}</Text>
-                <Text className="text-base text-slate-900">
+                <Text className="text-base font-semibold text-slate-50">{item.symbol}</Text>
+                <Text className="text-base text-slate-100">
                   {formatCurrency(item.market_value, currency)}
                 </Text>
               </View>
               <View className="mt-1 flex-row items-center justify-between">
-                <Text className="text-sm text-slate-500">
+                <Text className="text-sm text-slate-400">
                   {formatNumber(item.quantity)} @ {formatCurrency(item.avg_cost, currency)}
                 </Text>
-                <Text className={`text-sm ${pnlColor(item.unrealized_pnl)}`}>
+                <Text className={`text-sm ${pnl(item.unrealized_pnl)}`}>
                   {formatCurrency(item.unrealized_pnl, currency)} ({formatPercent(item.unrealized_pct)})
                 </Text>
               </View>
-              <Text className="mt-1 text-xs text-slate-400">
+              <Text className="mt-1 text-xs text-slate-500">
                 {formatPercent(item.allocation_pct)} of portfolio
                 {item.priced ? '' : ' · price stale'}
               </Text>
@@ -266,6 +281,7 @@ export function PortfolioScreen({ navigation }: RootScreenProps<'Portfolio'>) {
         onClose={() => setTradeOpen(false)}
         onSubmit={(txn) => addTxn.mutate(txn)}
       />
-    </SafeAreaView>
+      <BottomNav active="portfolio" />
+    </Screen>
   );
 }
